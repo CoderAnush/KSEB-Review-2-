@@ -1,0 +1,38 @@
+# Forecasting targets, models and quantiles. Model choice per target is config,
+# not code; A3 allows a 24-block day via blocks_per_day for coarse runs.
+
+calendar:
+  blocks_per_day: 96
+  timezone: Asia/Kolkata
+  holidays: kerala             # Kerala state holidays + national
+
+targets:
+  demand:
+    series_id: demand_mw
+    model: lightgbm            # baseline (A11: CPU-sized); options: lightgbm | nhits | tft
+    lags_days: [1, 2, 7]
+    weather_features: [temperature_2m, cloud_cover, precipitation]  # rain suppresses cooling load (chief-engineer session; ADR-14)
+    target_mape_pct: 3.0
+  price:
+    series_id: price_dam_inr_mwh
+    model: lightgbm
+    lags_days: [1, 2, 7]
+    weather_features: []
+    target_mae_inr_mwh: 600    # stretch: 300
+  inflow:
+    series_id: inflow_mwh
+    model: lightgbm
+    lags_days: [1, 7, 14]
+    weather_features: [precipitation]
+    target_mape_pct: 25.0      # A6 — reconstruction-limited; wide by design
+
+quantiles: [0.1, 0.5, 0.9]
+horizon_blocks: 96             # D+1, all 96 blocks
+
+backtest:
+  method: rolling_origin
+  folds: 8
+  fold_days: 14
+  min_train_days: 180
+
+registry_dir: artifacts/models

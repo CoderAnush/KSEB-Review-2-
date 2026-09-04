@@ -1,0 +1,307 @@
+{
+  "rates": {
+    "ISGS": {
+      "min": 3.2732,
+      "p50": 3.2732,
+      "mean": 3.2732,
+      "max": 3.2732
+    },
+    "LTA": {
+      "min": 3.076,
+      "p50": 3.076,
+      "mean": 3.076,
+      "max": 3.076
+    },
+    "MTOA": {
+      "min": 3.53,
+      "p50": 3.53,
+      "mean": 3.53,
+      "max": 3.53
+    },
+    "PX": {
+      "min": 1.491,
+      "p50": 3.4511,
+      "mean": 4.3527,
+      "max": 10.0
+    },
+    "RTM": {
+      "min": 0.7999,
+      "p50": 3.1937,
+      "mean": 3.6434,
+      "max": 10.0
+    },
+    "OTS": {
+      "min": 6.2,
+      "p50": 6.2,
+      "mean": 6.2,
+      "max": 6.2
+    },
+    "REN": {
+      "min": 2.8225,
+      "p50": 2.8225,
+      "mean": 2.8225,
+      "max": 2.8225
+    },
+    "Internal": {
+      "min": 1.238,
+      "p50": 1.238,
+      "mean": 1.238,
+      "max": 1.238
+    }
+  },
+  "mw": {
+    "ISGS": {
+      "min": 719.3,
+      "p50": 1447.1,
+      "mean": 1343.9,
+      "max": 1516.2
+    },
+    "LTA": {
+      "min": 452.7,
+      "p50": 656.3,
+      "mean": 703.7,
+      "max": 1174.9
+    },
+    "MTOA": {
+      "min": 0.0,
+      "p50": 398.6,
+      "mean": 438.0,
+      "max": 717.1
+    },
+    "PX": {
+      "min": -401.9,
+      "p50": -1.9,
+      "mean": -44.0,
+      "max": 111.4
+    },
+    "RTM": {
+      "min": -9.2,
+      "p50": 136.0,
+      "mean": 228.0,
+      "max": 1285.2
+    },
+    "OTS": {
+      "min": 0.0,
+      "p50": 0.0,
+      "mean": 19.7,
+      "max": 89.1
+    },
+    "REN": {
+      "min": 0.0,
+      "p50": 58.4,
+      "mean": 163.3,
+      "max": 478.9
+    }
+  },
+  "demand": {
+    "min": 2929.9,
+    "mean": 4017.9,
+    "max": 5130.2
+  },
+  "demand_profile": {
+    "night_min_block": 35,
+    "night_min_mw": 3387.7,
+    "peak_block": 89,
+    "peak_mw": 4921.1,
+    "ramp_mw": 1533.4
+  },
+  "synthetic_demand": {
+    "min": 2766.6,
+    "max": 4908.2
+  },
+  "synthetic_vs_actual": {
+    "mape_pct": 18.64,
+    "max_over_mw": 257.9,
+    "max_under_mw": -1727.8
+  },
+  "market": {
+    "px_sell_blocks": 407,
+    "px_buy_blocks": 361,
+    "px_max_sell_mw": 401.9,
+    "px_max_buy_mw": 111.4,
+    "rtm_sell_blocks": 50,
+    "rtm_max_buy_mw": 1285.2,
+    "rtm_max_sell_mw": 9.2,
+    "px_rate_at_cap_blocks": 106,
+    "rtm_rate_at_cap_blocks": 58
+  },
+  "deviation": {
+    "mean_abs_mw": 72.3,
+    "max_abs_mw": 530.9,
+    "frac_p50": 0.016,
+    "frac_p95": 0.0795,
+    "frac_max": 0.2074,
+    "blocks_beyond_1pct": 483,
+    "blocks_beyond_10pct": 20,
+    "total_blocks": 768
+  },
+  "hydro": {
+    "Idukki": {
+      "min": 60.5,
+      "mean": 496.4,
+      "max": 740.5,
+      "signed_min": -740.5,
+      "signed_max": -60.5
+    },
+    "Kakkad) - Level 2 of Sabrigiri": {
+      "min": 0.0,
+      "mean": 35.2,
+      "max": 37.0,
+      "signed_min": 0.0,
+      "signed_max": 37.0
+    },
+    "Poringal) - Level 2 of Sholayar": {
+      "min": 12.0,
+      "mean": 25.4,
+      "max": 67.0,
+      "signed_min": 12.0,
+      "signed_max": 67.0
+    },
+    "Sengulam) - Level 2 of Pallivasal": {
+      "min": 0.0,
+      "mean": 17.9,
+      "max": 50.8,
+      "signed_min": 0.0,
+      "signed_max": 50.8
+    },
+    "not a pumped storage": {
+      "min": 0.0,
+      "mean": 41.1,
+      "max": 54.3,
+      "signed_min": 0.0,
+      "signed_max": 54.3
+    },
+    "Sbarigiri) - Level 1": {
+      "min": 80.7,
+      "mean": 249.6,
+      "max": 274.9,
+      "signed_min": 80.7,
+      "signed_max": 274.9
+    },
+    "Idamalayar": {
+      "min": 20.2,
+      "mean": 46.4,
+      "max": 55.3,
+      "signed_min": -55.3,
+      "signed_max": -20.2
+    },
+    "Kakkayam": {
+      "min": 0.0,
+      "mean": 70.0,
+      "max": 196.4,
+      "signed_min": 0.0,
+      "signed_max": 196.4
+    },
+    "Lower Periyar": {
+      "min": 0.0,
+      "mean": 32.7,
+      "max": 117.3,
+      "signed_min": 0.0,
+      "signed_max": 117.3
+    },
+    "Neriamangalam": {
+      "min": 0.0,
+      "mean": 32.4,
+      "max": 58.6,
+      "signed_min": -58.6,
+      "signed_max": 0.0
+    },
+    "Pallivasal) - Level 1": {
+      "min": 0.0,
+      "mean": 0.0,
+      "max": 0.0,
+      "signed_min": 0.0,
+      "signed_max": 0.0
+    },
+    "Panniyar": {
+      "min": 0.0,
+      "mean": 21.8,
+      "max": 31.0,
+      "signed_min": -31.0,
+      "signed_max": 0.2
+    },
+    "Kallada": {
+      "min": 0.0,
+      "mean": 6.4,
+      "max": 10.4,
+      "signed_min": 0.0,
+      "signed_max": 10.4
+    },
+    "Barapole": {
+      "min": 0.0,
+      "mean": 0.0,
+      "max": 0.0,
+      "signed_min": 0.0,
+      "signed_max": 0.0
+    },
+    "Vilangadu": {
+      "min": 0.0,
+      "mean": 0.0,
+      "max": 0.0,
+      "signed_min": 0.0,
+      "signed_max": 0.0
+    },
+    "Poozhithode": {
+      "min": 0.0,
+      "mean": 0.0,
+      "max": 0.0,
+      "signed_min": 0.0,
+      "signed_max": 0.0
+    },
+    "Urumi": {
+      "min": 0.0,
+      "mean": 0.0,
+      "max": 0.0,
+      "signed_min": 0.0,
+      "signed_max": 0.0
+    },
+    "Malankara": {
+      "min": 0.0,
+      "mean": 0.3,
+      "max": 4.7,
+      "signed_min": 0.0,
+      "signed_max": 4.7
+    },
+    "Chembukadavu": {
+      "min": 0.0,
+      "mean": 0.0,
+      "max": 0.0,
+      "signed_min": 0.0,
+      "signed_max": 0.0
+    }
+  },
+  "hydro_total": {
+    "min": 355.5,
+    "mean": 1075.5,
+    "max": 1674.2
+  },
+  "hydro_daily_energy_mwh": {
+    "min": 24089.0,
+    "mean": 25813.0,
+    "max": 27304.0
+  },
+  "idukki": {
+    "min": 60.5,
+    "max": 740.5,
+    "blocks_below_30mw_nonzero": 0,
+    "blocks_zero": 0
+  },
+  "sengulam": {
+    "min": 0.0,
+    "max": 50.8,
+    "peak_block": 90,
+    "trough_block": 41
+  },
+  "solar": {
+    "max": 223.4,
+    "mean": 71.9
+  },
+  "wind": {
+    "max": 18.5,
+    "mean": 7.7
+  },
+  "cost": {
+    "total_8day_inr": 2068610789.09045,
+    "mean_block_inr": 2693504.0
+  }
+}

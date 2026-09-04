@@ -1,0 +1,72 @@
+# Source wiring (locked decision 1; assumptions A1, A3, A6, A7).
+# The registry instantiates adapters from this file — swapping a data source is a
+# config edit, never a code change. Set `adapter: synthetic` on any source to work
+# fully offline (the default until real feeds are proven).
+
+sources:
+  demand:
+    adapter: synthetic            # switch to demand_iced once ICED depth is confirmed (A3, A12)
+    series_id: demand_mw
+    params:
+      seed: 42
+      # Calibrated from data/Data_final.xlsx (8 days, 5-12 May 2025; ADR-14):
+      # observed mean 4,018 MW in May => base = 4018 / 1.08 May season factor.
+      # demand_profile: 96-block intraday shape (mean 1.0) — real Kerala curve:
+      # high midnight shoulder, 08:30 trough, 22:00 peak (was a generic
+      # night-valley curve that under-predicted by up to 1,728 MW).
+      demand_base_mw: 3720
+      demand_profile: [
+        1.1350, 1.1154, 1.0946, 1.0742, 1.0561, 1.0400, 1.0220, 1.0075,
+        0.9932, 0.9797, 0.9680, 0.9580, 0.9494, 0.9367, 0.9290, 0.9213,
+        0.9122, 0.9083, 0.9055, 0.9025, 0.9026, 0.9042, 0.9054, 0.9075,
+        0.9109, 0.9116, 0.9098, 0.9014, 0.8926, 0.8838, 0.8708, 0.8576,
+        0.8518, 0.8488, 0.8432, 0.8440, 0.8511, 0.8634, 0.8730, 0.8841,
+        0.8845, 0.8889, 0.8863, 0.8875, 0.8876, 0.8828, 0.8837, 0.8866,
+        0.8903, 0.8944, 0.8956, 0.8973, 0.8896, 0.8950, 0.9042, 0.9207,
+        0.9468, 0.9731, 0.9965, 1.0117, 1.0248, 1.0354, 1.0431, 1.0529,
+        1.0481, 1.0501, 1.0540, 1.0539, 1.0459, 1.0436, 1.0378, 1.0374,
+        1.0287, 1.0355, 1.0721, 1.1258, 1.1602, 1.1666, 1.1632, 1.1637,
+        1.1613, 1.1604, 1.1574, 1.1576, 1.1631, 1.1755, 1.1893, 1.2055,
+        1.2248, 1.2229, 1.2023, 1.1953, 1.1914, 1.1794, 1.1755, 1.1668,
+      ]
+  price:
+    adapter: synthetic            # switch to price_iex; source-swappable to coupled DAM (A1, A7)
+    series_id: price_dam_inr_mwh
+    params:
+      seed: 43
+  inflow:
+    adapter: synthetic            # switch to reservoir_cwc pseudo-inflow (A6 — weakest link)
+    series_id: inflow_mwh
+    params:
+      seed: 44
+      inflow_daily_mean_mwh: 19000  # annual ~6.9 TWh, matches Kerala actuals; was 9000
+                                    # (~half of reality — FINDINGS D3). May-2025 observed
+                                    # hydro output 25.8 GWh/day sits above the seasonal mean.
+  weather:
+    adapter: weather_openmeteo    # first real adapter; clean public API
+    series_id: weather
+    params:
+      latitude: 9.85              # Idukki catchment
+      longitude: 76.97
+      hourly: [temperature_2m, precipitation, cloud_cover]
+
+# Real-adapter parameters (used when a source above points at them)
+adapters:
+  demand_iced:
+    resolution_in: hourly         # A3: hourly -> 15-min shape-preserving interpolation, points flagged
+    csv_dir: data/iced
+  price_iex:
+    snapshot_url: "https://www.iexindia.com/market-data/day-ahead-market/market-snapshot"
+    csv_fallback_dir: data/iex_csv    # 30-day local cache — pipeline survives access breaks (A1)
+    cache_days: 30
+  reservoir_cwc:
+    bulletin_dir: data/cwc            # weekly bulletin PDFs (pdfplumber)
+    reservoirs: [idukki, idamalayar, kakki]
+    rainfall_series_id: weather.precipitation   # daily disaggregation regressor (A6)
+  file_drop:                          # KSEB internal slot-in contract (CSV: ts,series_id,value)
+    inbox_dir: data/inbox
+    archive_dir: data/inbox/processed
+
+quality:
+  max_gap_blocks: 8                   # longer gaps -> MISSING, not interpolated
+  spike_zscore: 6.0                   # |z| above this -> SUSPECT
