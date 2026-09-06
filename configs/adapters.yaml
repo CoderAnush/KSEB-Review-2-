@@ -1,11 +1,14 @@
 # Source wiring (locked decision 1; assumptions A1, A3, A6, A7).
-# The registry instantiates adapters from this file — swapping a data source is a
-# config edit, never a code change. Set `adapter: synthetic` on any source to work
-# fully offline (the default until real feeds are proven).
+# NOTE: The `adapter:` field below is currently NOT used for dispatch. The code always uses
+# make_synthetic_adapter() regardless of this field's value. This config is reserved for future
+# adapter selection logic; for now, it serves as documentation of the intended architecture where
+# swapping a data source would be a config edit, not a code change. See app/adapters/synthetic.py
+# for the current unconditional synthetic path. Real adapter implementations (demand_iced, price_iex,
+# etc.) do not yet exist; their config stanzas below are placeholders for future integration.
 
 sources:
   demand:
-    adapter: synthetic            # switch to demand_iced once ICED depth is confirmed (A3, A12)
+    adapter: synthetic            # switch to demand_iced once ICED depth is confirmed (A3, A12) [NOT YET WIRED]
     series_id: demand_mw
     params:
       seed: 42

@@ -18,16 +18,16 @@ forecasting model development, data reconciliation, feature engineering, and eva
 - Evidence charts and findings document
 
 ✅ **August 2026:** Feature engineering & forecasting model design
-- 12 engineered features (temporal lags, cyclical encoding, weather, holidays)
+- 13 engineered features (temporal lags, cyclical encoding, weather, holidays)
 - LightGBM quantile regression + SeasonalNaive fallback
 - Quantile monotonicity enforcement
 - Rolling-origin backtesting framework (MAPE/MAE/pinball metrics)
 - Model registry with versioning
 
 ✅ **September 2026:** Demand forecasting model development & evaluation
-- Trained demand forecasting model: **MAPE 2.68% (target ≤3.0%)** ✅
+- Trained demand forecasting model: **MAPE 2.74% (target ≤3.0%)** ✅
 - Price forecasting: MAE 374.5 (target ≤600) ✅
-- Inflow forecasting: MAPE 19.70% (target ≤25.0%) ✅
+- Inflow forecasting: MAPE 17.53% (target ≤25.0%) ✅
 - Reproducible evaluation script
 - Full test suite (8/8 tests passing)
 
@@ -127,7 +127,7 @@ docs/
 - [x] Test: `test_reconcile_8day.py` **PASSED** ✅
 
 ### August 2026 ✅
-- [x] 12 features engineered (lags, temporal, weather, holidays)
+- [x] 13 features engineered (lags, temporal, weather, holidays)
 - [x] LightGBM model + SeasonalNaive fallback
 - [x] Quantile monotonicity enforced
 - [x] Rolling-origin backtesting framework
@@ -136,13 +136,13 @@ docs/
 
 ### September 2026 ✅
 - [x] Demand forecasting model trained
-  - **MAPE: 2.68%** (target ≤3.0%) ✅ **EXCEEDS TARGET**
-  - **MAE: 83.6 MW**
+  - **MAPE: 2.74%** (target ≤3.0%) ✅ **EXCEEDS TARGET**
+  - **MAE: 105.4 MW**
   - **8 folds, 400-day backtest**
 - [x] Price forecasting model trained
   - **MAE: 374.5 ₹/MWh** (target ≤600) ✅
 - [x] Inflow forecasting model trained
-  - **MAPE: 19.70%** (target ≤25.0%) ✅
+  - **MAPE: 17.53%** (target ≤25.0%) ✅
 - [x] Metrics documented in `docs/metrics_forecasts.md`
 - [x] Evaluation script reproducible (`scripts/eval_forecasts.py`)
 - [x] Tests: All 7 forecasting tests **PASSED** ✅
@@ -174,9 +174,9 @@ Total: 8 passed in 4.96s ✅
 
 | Target | Model | MAPE / MAE | Goal | Status |
 |--------|-------|------------|------|--------|
-| **Demand** | LightGBM | 2.68% MAPE | ≤3.0% | ✅ **PASS** (exceeds) |
+| **Demand** | LightGBM | 2.74% MAPE | ≤3.0% | ✅ **PASS** (exceeds) |
 | **Price** | LightGBM | 374.5 ₹/MWh MAE | ≤600 | ✅ **PASS** |
-| **Inflow** | LightGBM | 19.70% MAPE | ≤25.0% | ✅ **PASS** |
+| **Inflow** | LightGBM | 17.53% MAPE | ≤25.0% | ✅ **PASS** |
 
 ---
 

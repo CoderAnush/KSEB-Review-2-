@@ -1,0 +1,22 @@
+
+====================================================================================================
+4. SEED / CONFIG SENSITIVITY TEST (dead-config detector)
+====================================================================================================
+Same seed (42) twice, demand day 2026-05-15: identical output = True  (must be True)
+Different seed (999) vs (42): output differs = True  (must be True)
+
+--- Parameter change sensitivity (5 params) ---
+Baseline (demand_base_mw=3720): mean=4025.92 MW
+  demand_base_mw=2000.0: mean=2164.47 MW  (decreased vs baseline)
+  demand_base_mw=5000.0: mean=5411.19 MW  (increased vs baseline)
+
+Baseline inflow (inflow_daily_mean_mwh=19000): mean=126.604 MWh/block
+  inflow_daily_mean_mwh=5000.0: mean=33.317  (decreased vs baseline)
+  inflow_daily_mean_mwh=40000.0: mean=266.534  (increased vs baseline)
+
+Baseline demand_profile[0] (block 1, midnight) = 1.135
+  block 1 value: baseline=4602.91 MW  after tripling profile[0]=13808.73 MW  (changed: True)
+
+Seed parameter: already shown above to change output (42 vs 999).
+
+DONE PHASE 1 PART C

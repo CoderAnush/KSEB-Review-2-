@@ -29,7 +29,7 @@ Start here to understand the real-world baseline:
 Understand how forecasts are built:
 
 - **Feature engineering:** `backend/app/forecasting/features.py`
-  - 12 features: lags (1/2/7-day), cyclical encoding, weather, holidays
+  - 13 features: lags (1/2/7-day), cyclical encoding, weather, holidays
   - Tests: `test_feature_frame_columns_and_no_nan`, `test_kerala_holidays_include_onam_and_fixed`
 
 - **Models:** `backend/app/forecasting/models.py`
@@ -57,14 +57,14 @@ Understand how forecasts are built:
 This is what to showcase:
 
 - **Demand model performance:**
-  - MAPE: **2.68%** (target ≤3.0%) ✅ **EXCEEDS TARGET**
-  - MAE: 83.6 MW
+  - MAPE: **2.74%** (target ≤3.0%) ✅ **EXCEEDS TARGET**
+  - MAE: 105.4 MW
   - 8 folds over 400 days of synthetic data
   - Pinball loss (p10/p90) computed
 
 - **Supporting models (bonus):**
   - Price: MAE **374.5 ₹/MWh** (target ≤600) ✅
-  - Inflow: MAPE **19.70%** (target ≤25.0%) ✅
+  - Inflow: MAPE **17.53%** (target ≤25.0%) ✅
 
 - **Evidence:**
   - `docs/metrics_forecasts.md` — auto-generated metrics table
@@ -193,9 +193,9 @@ Those modules are held separately and will be included in future submissions.
 ## Summary
 
 ✅ **Data reconciled** from real KSEB field data (May 2025)  
-✅ **Features engineered** (12 features, tested)  
+✅ **Features engineered** (13 features, tested)  
 ✅ **Models trained** (LightGBM for 3 targets)  
-✅ **Demand forecast validated** (2.68% MAPE, target ≤3%)  
+✅ **Demand forecast validated** (2.74% MAPE, target ≤3%)  
 ✅ **All tests passing** (8/8)  
 ✅ **Reproducible** (scripts, fixtures, no external APIs)  
 

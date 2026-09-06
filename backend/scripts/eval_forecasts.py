@@ -10,7 +10,7 @@ import argparse
 from datetime import date, timedelta
 from pathlib import Path
 
-from app.adapters.synthetic import SyntheticAdapter
+from app.adapters.synthetic import make_synthetic_adapter
 from app.config import load_config
 from app.domain.enums import ForecastTarget
 from app.forecasting.backtest import rolling_origin_backtest
@@ -20,15 +20,18 @@ from app.logging_setup import configure_logging, get_logger
 log = get_logger(__name__)
 
 SERIES = {
-    ForecastTarget.DEMAND: ("demand", "demand_mw", 42),
-    ForecastTarget.PRICE: ("price", "price_dam_inr_mwh", 43),
-    ForecastTarget.INFLOW: ("inflow", "inflow_mwh", 44),
+    ForecastTarget.DEMAND: ("demand", "demand_mw"),
+    ForecastTarget.PRICE: ("price", "price_dam_inr_mwh"),
+    ForecastTarget.INFLOW: ("inflow", "inflow_mwh"),
 }
 
 
 def synthetic_history(target: ForecastTarget, days: int, end: date):
-    name, series_id, seed = SERIES[target]
-    adapter = SyntheticAdapter(name, series_id, seed)
+    name, series_id = SERIES[target]
+    # make_synthetic_adapter (not SyntheticAdapter directly) so the ADR-14
+    # calibration in configs/adapters.yaml actually applies (bug found 2026-09-06:
+    # direct construction silently used pre-ADR-14 class defaults).
+    adapter = make_synthetic_adapter(name, series_id)
     points = []
     d = end - timedelta(days=days)
     while d < end:

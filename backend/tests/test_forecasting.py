@@ -104,6 +104,47 @@ def test_registry_round_trip(tmp_path, demand_history) -> None:
     assert model2.predict_day(future)["p50"] == model.predict_day(future)["p50"]
 
 
+def test_calibrated_adapter_uses_configured_base() -> None:
+    """Regression test: ensure calibration from configs/adapters.yaml is actually applied.
+
+    This guards against the bug fixed 2026-09-06 where SyntheticAdapter was instantiated
+    directly instead of through make_synthetic_adapter(), silently using pre-calibration
+    defaults (demand_base_mw=3200) instead of the configured calibrated value (3720).
+
+    If this test fails, it means someone has reverted to direct SyntheticAdapter() construction
+    or make_synthetic_adapter() is not reading the configuration.
+    """
+    from app.adapters.synthetic import make_synthetic_adapter
+
+    d = date(2026, 5, 15)
+
+    # Generate demand using the configured adapter (should load demand_base_mw=3720 from config)
+    adapter = make_synthetic_adapter("demand", "demand_mw")
+    day_points = adapter.generate_day(d)
+    values = [p.value for p in day_points]
+    mean_demand = sum(values) / len(values)
+
+    # The calibrated mean should be around 4,018 MW (from the observed 8-day KSEB data in May 2025)
+    # If calibration is applied: demand_base_mw=3720, scaled profile -> mean ~4,000-4,100 MW
+    # If calibration is bypassed (old class default demand_base_mw=3200): mean ~3,200-3,300 MW
+    # This test detects the latter case by asserting mean is closer to 4,018 than to 3,200.
+
+    distance_to_calibrated = abs(mean_demand - 4018.0)
+    distance_to_uncalibrated = abs(mean_demand - 3200.0)
+
+    assert distance_to_calibrated < distance_to_uncalibrated, (
+        f"Calibration not applied: mean demand {mean_demand:.1f} MW is closer to "
+        f"uncalibrated default (3200) than calibrated value (3720/4018). "
+        f"This suggests direct SyntheticAdapter() usage instead of make_synthetic_adapter()."
+    )
+
+    # Additional assertion: mean should be in a reasonable range for calibrated demand
+    assert 3500 < mean_demand < 4500, (
+        f"Calibrated demand mean {mean_demand:.1f} is outside expected range [3500, 4500]. "
+        f"Check configs/adapters.yaml source.demand.params for correctness."
+    )
+
+
 def test_backtest_folds_exact_size_and_disjoint(demand_history) -> None:
     """Audit fix: the old `<= test_end + 1 day` boundary made each test window
     96*fold_days + 1 blocks, double-counting the next fold's midnight block."""

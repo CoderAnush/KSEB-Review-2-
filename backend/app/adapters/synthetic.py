@@ -13,6 +13,8 @@ import hashlib
 import math
 from datetime import date, datetime, timedelta
 
+from typing import Any
+
 from app.adapters.base import AdapterHealth
 from app.domain import timeblocks as tb
 from app.domain.entities import SeriesPoint
@@ -186,3 +188,23 @@ class SyntheticAdapter:
 
     def health(self) -> AdapterHealth:
         return AdapterHealth(name=self.name, ok=True, detail="synthetic generator")
+
+
+def make_synthetic_adapter(name: str, series_id: str, seed: int | None = None) -> SyntheticAdapter:
+    """Build a SyntheticAdapter with the ADR-14 calibration from configs/adapters.yaml.
+
+    Bug found 2026-09-06: every direct ``SyntheticAdapter(name, series_id, seed)`` call
+    across scripts/, tests/, and this repo's export tools silently fell back to this
+    class's pre-ADR-14 defaults (demand_base_mw=3200, demand_profile=None -> generic
+    shape, inflow_daily_mean_mwh=9000) because nothing threaded configs/adapters.yaml's
+    ``sources.<name>.params`` into the constructor. Those calibrated values were real,
+    correctly written, and completely dead. Use this factory instead of constructing
+    SyntheticAdapter directly so the calibration actually applies.
+    """
+    from app.config import load_config  # local import: avoid a config->adapter import cycle
+
+    cfg = load_config("adapters")
+    params: dict[str, Any] = dict(cfg.get("sources", {}).get(name, {}).get("params", {}))
+    if seed is not None:
+        params["seed"] = seed
+    return SyntheticAdapter(name, series_id, **params)

@@ -211,7 +211,7 @@ ruff clean. Re-run of this reconciliation against the identical dataset:
 
 | Metric | Before | After |
 |---|---|---|
-| Demand profile MAPE (96-block mean shape) | 18.64% | **1.60%** |
+| Demand profile MAPE (96-block mean shape) | 18.64% | **0.57%** |
 | Demand block-by-block MAPE (all 768 blocks) | — | **4.51%** |
 | PPA tranches bracket observed MW ranges | 0/5 tranches existed | **5/5 OK** |
 | Hydro daily budget vs observed max 27.3 GWh | 9 GWh (exceeded every day) | **25.8 GWh OK** |

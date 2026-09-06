@@ -51,9 +51,9 @@ python -m scripts.eval_forecasts
 **Results:**
 | Target | MAPE / MAE | Target | Status |
 |--------|------------|--------|--------|
-| Demand | 2.68% MAPE | ≤3.0% | ✅ PASS |
+| Demand | 2.74% MAPE | ≤3.0% | ✅ PASS |
 | Price | 374.5 ₹/MWh | ≤600 | ✅ PASS |
-| Inflow | 19.70% MAPE | ≤25.0% | ✅ PASS |
+| Inflow | 17.53% MAPE | ≤25.0% | ✅ PASS |
 
 ---
 
@@ -79,7 +79,7 @@ python -m scripts.reconcile_kseb_8day --xlsx ../data/Data_final.xlsx --out-dir .
 **Then code:**
 
 4. **backend/app/forecasting/** — The forecasting pipeline
-   - `features.py` — 12 engineered features
+   - `features.py` — 13 engineered features
    - `models.py` — LightGBM + SeasonalNaive
    - `backtest.py` — Rolling-origin evaluation
    - `registry.py` — Model versioning
@@ -107,9 +107,9 @@ python -m scripts.reconcile_kseb_8day --xlsx ../data/Data_final.xlsx --out-dir .
 
 | Metric | Value | Target | Status |
 |--------|-------|--------|--------|
-| **Demand MAPE** | 2.68% | ≤3.0% | ✅ Exceeds |
+| **Demand MAPE** | 2.74% | ≤3.0% | ✅ Exceeds |
 | **Price MAE** | 374.5 ₹/MWh | ≤600 | ✅ Pass |
-| **Inflow MAPE** | 19.70% | ≤25.0% | ✅ Pass |
+| **Inflow MAPE** | 17.53% | ≤25.0% | ✅ Pass |
 | **Backtest folds** | 8 | — | 400 days |
 | **Tests passing** | 8/8 | — | ✅ All pass |
 | **Code coverage** | Forecasting + Ingestion | — | ✅ Complete |
@@ -174,9 +174,9 @@ python -m scripts.reconcile_kseb_8day --xlsx ../data/Data_final.xlsx --out-dir .
 ## Summary
 
 ✅ **Data prepared** from real KSEB field data (May 2025)  
-✅ **Features engineered** (12 features, all tested)  
+✅ **Features engineered** (13 features, all tested)  
 ✅ **Models trained** (LightGBM for demand, price, inflow)  
-✅ **Demand forecast** MAPE 2.68% (target ≤3.0%) **EXCEEDS TARGET**  
+✅ **Demand forecast** MAPE 2.74% (target ≤3.0%) **EXCEEDS TARGET**  
 ✅ **All tests passing** (8/8)  
 ✅ **Reproducible** (no external APIs, all scripts work standalone)  
 

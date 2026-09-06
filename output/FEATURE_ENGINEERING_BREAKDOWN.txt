@@ -1,0 +1,63 @@
+
+FEATURE ENGINEERING BREAKDOWN
+==============================
+
+1. AUTOREGRESSIVE (Lag) FEATURES - 3 features
+   |- lag_1d: Demand from 24 hours ago (1 day = 96 blocks)
+   |- lag_2d: Demand from 48 hours ago (2 days = 192 blocks)
+   |- lag_7d: Demand from 7 days ago (7 days = 672 blocks)
+   +- Why: Captures daily and weekly patterns
+
+2. TEMPORAL (Intra-day) FEATURES - 2 features
+   |- block_sin: Circular encoding of time-of-day (0-1 wave)
+   |- block_cos: Circular encoding of time-of-day (0-1 wave)
+   +- Why: 00:00 = (sin~0, cos~1), 06:00 = (sin~1, cos~0), etc.
+
+3. CALENDAR (Structural) FEATURES - 3 features
+   |- dow: Day of week (0=Mon, 1=Tue, ..., 6=Sun)
+   |- is_weekend: Binary flag (0=weekday, 1=Sat/Sun)
+   |- is_holiday: Binary flag (0=normal, 1=Onam/Vishu/etc)
+   +- Why: Different demand patterns on holidays/weekends
+
+4. SEASONAL (Annual) FEATURES - 2 features
+   |- month_sin: Circular encoding of month (1-12)
+   |- month_cos: Circular encoding of month (1-12)
+   +- Why: Summer vs. monsoon vs. winter demand differences
+
+5. WEATHER FEATURES - 3 features
+   |- temperature_2m: Temperature in C
+   |- precipitation: Rain in mm
+   |- cloud_cover: Cloud coverage %
+   +- Why: Temperature affects AC load, rain affects solar (generated
+      as 0 in synthetic data; see note on real importance below)
+
+TOTAL: 13 features + 1 target (value) = 14 columns
+(Per configs/forecasting.yaml targets.demand: lags_days=[1,2,7],
+weather_features=[temperature_2m, cloud_cover, precipitation])
+
+RAW DATA STATISTICS (400-day synthetic dataset, 37,728 rows after lag drop,
+from output/engineered_features_demand_400days.csv):
+|- Value (demand): mean=2,993.9 MW, std=547.5 MW, range=[2,167-5,207]
+|- lag_1d correlation with value: 0.9721
+|- lag_2d correlation with value: 0.9437
+|- lag_7d correlation with value: 0.9683
+|- Block_sin/cos: mean~0, std~0.71 (circular uniform distribution)
+|- dow: mean=2.99, std=2.00 (uniform 0-6)
+|- month_sin/cos: mean~0 (circular uniform)
++- Weather: all zeros in synthetic data (real deployment would fetch live)
+
+REAL FEATURE IMPORTANCE (from an actually-trained LightGBM model,
+output/real_feature_importance.json - NOT estimated, pulled directly from
+the model's .feature_importances_):
+1. lag_7d       19.9%  <- most important
+2. lag_1d       18.3%
+3. lag_2d       16.6%
+4. dow          13.3%  (surprisingly strong)
+5. month_sin    10.0%
+6. month_cos     7.8%
+7. block_sin     7.2%
+8. block_cos     5.7%
+9. is_holiday    1.2%
+10. is_weekend, temperature_2m, cloud_cover, precipitation: 0% each
+    (the trained model never split on these 4 features at all)
+    

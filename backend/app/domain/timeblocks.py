@@ -6,6 +6,13 @@ Conventions, fixed project-wide:
 - Block intervals are half-open [start, end).
 
 Never construct block indices by hand anywhere else in the codebase.
+
+NOTE: BLOCKS_PER_DAY and IST are architectural constants (the KSEB grid operates on a 96×15-min
+block structure and IST timezone). These values are hardcoded here rather than loaded from
+configs/forecasting.yaml because they are immutable project domain constraints, not configurable
+parameters. See configs/forecasting.yaml:5-6 (calendar.blocks_per_day, calendar.timezone) for the
+documentation of these values; they serve as a single source of truth for their semantic meaning
+but are not expected to change at runtime.
 """
 
 from __future__ import annotations

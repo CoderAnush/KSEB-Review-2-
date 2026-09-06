@@ -1,0 +1,72 @@
+{
+  "target": "demand",
+  "quantile": "p50",
+  "importance_type": "split",
+  "features": [
+    {
+      "name": "lag_7d",
+      "raw_importance": 3527,
+      "pct": 18.962365591397848
+    },
+    {
+      "name": "lag_2d",
+      "raw_importance": 3215,
+      "pct": 17.28494623655914
+    },
+    {
+      "name": "lag_1d",
+      "raw_importance": 3037,
+      "pct": 16.327956989247312
+    },
+    {
+      "name": "dow",
+      "raw_importance": 2660,
+      "pct": 14.301075268817204
+    },
+    {
+      "name": "month_sin",
+      "raw_importance": 1964,
+      "pct": 10.559139784946236
+    },
+    {
+      "name": "block_sin",
+      "raw_importance": 1558,
+      "pct": 8.376344086021506
+    },
+    {
+      "name": "month_cos",
+      "raw_importance": 1440,
+      "pct": 7.741935483870968
+    },
+    {
+      "name": "block_cos",
+      "raw_importance": 974,
+      "pct": 5.236559139784946
+    },
+    {
+      "name": "is_holiday",
+      "raw_importance": 225,
+      "pct": 1.2096774193548387
+    },
+    {
+      "name": "is_weekend",
+      "raw_importance": 0,
+      "pct": 0.0
+    },
+    {
+      "name": "temperature_2m",
+      "raw_importance": 0,
+      "pct": 0.0
+    },
+    {
+      "name": "cloud_cover",
+      "raw_importance": 0,
+      "pct": 0.0
+    },
+    {
+      "name": "precipitation",
+      "raw_importance": 0,
+      "pct": 0.0
+    }
+  ]
+}

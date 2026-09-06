@@ -1,10 +1,17 @@
 # Forecasting targets, models and quantiles. Model choice per target is config,
 # not code; A3 allows a 24-block day via blocks_per_day for coarse runs.
 
+# NOTE on calendar config: The values below document the project's calendar assumptions
+# but are NOT currently loaded from this config at runtime — they are hardcoded as
+# architectural constants in app/domain/timeblocks.py (BLOCKS_PER_DAY, IST) and
+# app/forecasting/features.py (kerala_holidays()). These values are stored here as
+# a single source of truth for their semantic meaning and for future reference, but
+# changing them in this YAML will not affect runtime behavior. See § Architecture
+# in README.md for why these are fixed, not configurable.
 calendar:
-  blocks_per_day: 96
-  timezone: Asia/Kolkata
-  holidays: kerala             # Kerala state holidays + national
+  blocks_per_day: 96           # Domain invariant: KSEB grid structure. Hardcoded in timeblocks.py.
+  timezone: Asia/Kolkata       # Domain invariant: IST (UTC+05:30). Hardcoded in timeblocks.py.
+  holidays: kerala             # Kerala state holidays + national. Hardcoded in features.py.
 
 targets:
   demand:
@@ -27,12 +34,12 @@ targets:
     target_mape_pct: 25.0      # A6 — reconstruction-limited; wide by design
 
 quantiles: [0.1, 0.5, 0.9]
-horizon_blocks: 96             # D+1, all 96 blocks
+horizon_blocks: 96             # D+1, all 96 blocks. Reserved for future multi-horizon forecasting; currently unused.
 
 backtest:
-  method: rolling_origin
-  folds: 8
-  fold_days: 14
-  min_train_days: 180
+  method: rolling_origin       # Only rolling_origin is currently implemented; method selection not yet wired.
+  folds: 8                      # Number of rolling-origin folds
+  fold_days: 14                 # Test window size for each fold
+  min_train_days: 180           # Minimum training window before first test fold
 
 registry_dir: artifacts/models
