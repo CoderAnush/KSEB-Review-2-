@@ -1,5 +1,5 @@
 # KSEB Review-2: Implementation Completion Report
-**Date:** September 6, 2026 | **Status:** ✅ TIMELINE COMPLETE THROUGH SEPTEMBER 2026
+**Status:** ✅ TIMELINE COMPLETE THROUGH SEPTEMBER 2026
 
 ---
 
@@ -52,13 +52,13 @@ The KSEB AI-driven Decision Support System has successfully completed all develo
 
 | Category | Status | Details |
 |---|---|---|
-| **Unit Tests** | ✅ 9/9 PASS | Feature engineering, model shape, leakage proof, calibration regression |
-| **Code Quality** | ✅ CLEAN | Ruff all checks passed |
+| **Unit Tests** | ✅ 14/14 PASS | Feature engineering, model shape, leakage proof, calibration regression, DB sanitization |
+| **Code Quality** | ✅ CLEAN | Ruff + mypy all checks passed |
 | **Metrics Reproducibility** | ✅ VERIFIED | Independent recomputation matches stored metrics to 4 decimals |
 | **Backtest Integrity** | ✅ NO LEAKAGE | Proved: max(train) < min(test) across all 8 folds |
 | **Lag Feature Accuracy** | ✅ EXACT-MATCH | Sampled verification: 0 mismatches on lag_1d/lag_2d/lag_7d |
-| **Chart Reproducibility** | ✅ 10/10 | All PNG charts regenerable from source data |
-| **Calibration Guard** | ✅ REGRESSION TEST | New test ensures config is actually loaded (catches prior bug) |
+| **Chart Reproducibility** | ✅ 16/16 | All PNG charts regenerable from source data (demand + price + inflow) |
+| **Calibration Guard** | ✅ REGRESSION TEST | Test ensures config is actually loaded (catches prior bug) |
 
 ---
 
@@ -113,34 +113,41 @@ Status:       ✅ MEETS TARGET (≤ 25% MAPE), INTEGRATED
 | Chart | Source | Status |
 |---|---|---|
 | chart_demand_profile_after.png | Calibration (synthetic vs KSEB real) | ✅ Reproducible |
-| chart_real_validation_folds.png | Per-fold MAPE/MAE | ✅ Reproducible |
-| chart_real_feature_importance.png | Trained model (LightGBM) | ✅ Reproducible |
-| chart_real_holdout_forecast.png | 30-day held-out predictions | ✅ Reproducible |
 | chart_demand_profile.png | KSEB 8-day demand | ✅ Reproducible |
 | chart_demand_delta.png | Demand deviations | ✅ Reproducible |
 | chart_deviation_pattern.png | Scheduling patterns | ✅ Reproducible |
 | chart_hydro_energy.png | Hydro generation | ✅ Reproducible |
 | chart_market_rates.png | Market clearing prices | ✅ Reproducible |
 | chart_supply_mix.png | Power source composition | ✅ Reproducible |
+| chart_real_validation_folds.png | Demand: per-fold MAPE/MAE | ✅ Reproducible |
+| chart_real_feature_importance.png | Demand: trained model (LightGBM) | ✅ Reproducible |
+| chart_real_holdout_forecast.png | Demand: 30-day held-out predictions | ✅ Reproducible |
+| chart_price_validation_folds.png | Price: per-fold MAPE/MAE | ✅ Reproducible |
+| chart_price_feature_importance.png | Price: trained model (LightGBM) | ✅ Reproducible |
+| chart_price_holdout_forecast.png | Price: 30-day held-out predictions | ✅ Reproducible |
+| chart_inflow_validation_folds.png | Inflow: per-fold MAPE/MAE | ✅ Reproducible |
+| chart_inflow_feature_importance.png | Inflow: trained model (LightGBM) | ✅ Reproducible |
+| chart_inflow_holdout_forecast.png | Inflow: 30-day held-out predictions | ✅ Reproducible |
 
-**All 10 charts regenerable from source via:**
+**All 16 charts regenerable from source via (from the repo root):**
 ```bash
-python -m scripts.generate_all_charts
+python -m backend.scripts.generate_all_charts
 ```
 
 ---
 
 ## ✅ Verification Checklist (Post-Fix)
 
-- [x] All 9 pytest tests pass
-- [x] Ruff code quality checks pass
+- [x] All 14 pytest tests pass
+- [x] Ruff + mypy code quality checks pass
 - [x] Demand forecasting MAPE = 2.74% (target: ≤ 3.0%)
-- [x] Price forecasting MAPE = 8.81%
+- [x] Price forecasting MAPE = 8.81%, MAE = 374.5 ₹/MWh (target: ≤ 600)
 - [x] Inflow forecasting MAPE = 17.53% (target: ≤ 25%)
-- [x] No backtest leakage proven across 8 folds
+- [x] No backtest leakage proven across 8 folds, for all 3 targets
 - [x] Lag features verified exact-match with raw data
 - [x] Calibration configuration verified live
-- [x] All 10 PNG charts reproducible from source
+- [x] All 16 PNG charts reproducible from source (demand + price + inflow)
+- [x] Per-fold JSON, feature importance, and holdout forecast produced for all 3 targets
 - [x] No import-time side effects
 - [x] Configuration wiring documented
 - [x] Real vs synthetic metric distinction preserved

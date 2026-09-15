@@ -293,5 +293,4 @@ These are scheduled for October–April 2027 and are held separately in the full
 
 ---
 
-**Status:** ✅ **July–September 2026 milestones COMPLETE and VERIFIED**  
-**Last Updated:** September 15, 2026
+**Status:** ✅ **July–September 2026 milestones COMPLETE and VERIFIED**

@@ -24,15 +24,21 @@ pip install lightgbm  # Required for forecasting model
 pytest tests/ -v
 ```
 
-**Expected: 8/8 PASSED** ✅
+**Expected: 14/14 PASSED** ✅
 
 ```
+test_db_sanitize.py::test_sanitize_lowercases_and_collapses_special_chars PASSED
+test_db_sanitize.py::test_sanitize_strips_leading_trailing_underscores .. PASSED
+test_db_sanitize.py::test_sanitize_never_returns_empty_string ........... PASSED
+test_db_sanitize.py::test_dedupe_disambiguates_collisions_deterministically PASSED
+test_db_sanitize.py::test_dedupe_is_a_noop_when_no_collisions ........... PASSED
 test_forecasting.py::test_feature_frame_columns_and_no_nan ............. PASSED
 test_forecasting.py::test_kerala_holidays_include_onam_and_fixed ....... PASSED
 test_forecasting.py::test_seasonal_naive_predicts_shapes .............. PASSED
 test_forecasting.py::test_lightgbm_quantile_fit_predict ............... PASSED
 test_forecasting.py::test_backtest_returns_finite_metrics ............. PASSED
 test_forecasting.py::test_registry_round_trip ........................ PASSED
+test_forecasting.py::test_calibrated_adapter_uses_configured_base ..... PASSED
 test_forecasting.py::test_backtest_folds_exact_size_and_disjoint ...... PASSED
 test_reconcile_8day.py::test_reconcile_reproduces_cost_and_filedrop ... PASSED
 ```
@@ -83,23 +89,29 @@ python -m scripts.reconcile_kseb_8day --xlsx ../data/Data_final.xlsx --out-dir .
    - `models.py` — LightGBM + SeasonalNaive
    - `backtest.py` — Rolling-origin evaluation
    - `registry.py` — Model versioning
-   - `service.py` — Orchestration
 
-5. **backend/tests/** — All tests with passing results
-   - `test_forecasting.py` (7 tests) ✅
+5. **backend/reports/** — Report/chart generators (produce this repo's deliverables)
+   - `extract_real_model_outputs.py` — trains all 3 models, writes `real_*.json`
+   - `plot_real_model_outputs.py` — turns that JSON into charts
+
+6. **backend/tests/** — All tests with passing results
+   - `test_forecasting.py` (8 tests) ✅
    - `test_reconcile_8day.py` (1 test) ✅
+   - `test_db_sanitize.py` (5 tests) ✅
 
-6. **backend/scripts/** — Reproducible evaluation
+7. **backend/scripts/** — Reproducible evaluation
    - `eval_forecasts.py` — Auto-generate metrics
    - `reconcile_kseb_8day.py` — Validate field data
+   - `generate_all_charts.py` — Regenerate all 16 charts end-to-end
 
 **Evidence:**
 
-7. **output/FINDINGS_KSEB_8DAY.md** — Analysis of divergences between synthetic and real data
-8. **output/kseb_filedrop.csv** — Tidy demand + price data
-9. **output/chart_*.png** (7 files) — Exploratory visualizations
-10. **output/reconciliation_stats.json** — Validated cost totals
-11. **docs/metrics_forecasts.md** — Backtest metrics (auto-generated)
+8. **output/FINDINGS_KSEB_8DAY.md** — Analysis of divergences between synthetic and real data
+9. **output/kseb_filedrop.csv** — Tidy demand + price data
+10. **output/chart_*.png** (16 files total: 6 from real KSEB field data, 3 per forecasting
+    target x 3 targets) — visualizations
+11. **output/reconciliation_stats.json** — Validated cost totals
+12. **docs/metrics_forecasts.md** — Backtest metrics (auto-generated)
 
 ---
 
@@ -111,17 +123,23 @@ python -m scripts.reconcile_kseb_8day --xlsx ../data/Data_final.xlsx --out-dir .
 | **Price MAE** | 374.5 ₹/MWh | ≤600 | ✅ Pass |
 | **Inflow MAPE** | 17.53% | ≤25.0% | ✅ Pass |
 | **Backtest folds** | 8 | — | 400 days |
-| **Tests passing** | 8/8 | — | ✅ All pass |
-| **Code coverage** | Forecasting + Ingestion | — | ✅ Complete |
+| **Tests passing** | 14/14 | — | ✅ All pass |
+| **Charts regenerable** | 16/16 | — | ✅ Complete |
 
 ---
 
 ## Architecture
 
-```
-Forecasting Pipeline (Daily)
+Design intent for a live daily pipeline (the orchestration layer below - a `run_forecasts()`
+service that would call this on a schedule - is not implemented in this submission; what
+actually runs is `backend/reports/extract_real_model_outputs.py`, invoked manually or via
+`scripts/generate_all_charts.py`, which performs the same feature-engineering -> train ->
+predict -> monotonicity steps, just without the daily-schedule/DB-persistence wrapper):
 
-  History (540 days)
+```
+Forecasting Pipeline (Daily, design intent)
+
+  History (400 days, this submission)
       ↓
   Feature Engineering (lags, temporal, weather, holidays)
       ↓
@@ -131,8 +149,8 @@ Forecasting Pipeline (Daily)
       ↓
   Enforce Monotonicity (p10 ≤ p50 ≤ p90)
       ↓
-  Persist to DB
-      ↓
+  Persist to DB   ← not wired in this submission (see backend/app/db/ for the separate,
+      ↓             optional CSV->Postgres loader, which is unrelated to this pipeline)
   Return ForecastSet
 ```
 
@@ -140,11 +158,12 @@ Forecasting Pipeline (Daily)
 
 ## What's NOT Included
 
-- MILP optimization (October)
-- RL control (January)
-- Digital Twin (February)
-- Multi-agent LLM (March)
-- FastAPI/Dashboard (April)
+- MILP-based hydro scheduling & procurement optimization (October)
+- Model enhancement with operational constraints (November)
+- RL-based pumped storage control (December)
+- Digital Twin simulation (January)
+- System integration & testing (February)
+- Documentation, thesis, final deployment (March)
 
 These are in the full project and will be added in future submissions.
 
@@ -177,7 +196,7 @@ python -m scripts.reconcile_kseb_8day --xlsx ../data/Data_final.xlsx --out-dir .
 ✅ **Features engineered** (13 features, all tested)  
 ✅ **Models trained** (LightGBM for demand, price, inflow)  
 ✅ **Demand forecast** MAPE 2.74% (target ≤3.0%) **EXCEEDS TARGET**  
-✅ **All tests passing** (8/8)  
+✅ **All tests passing** (14/14)  
 ✅ **Reproducible** (no external APIs, all scripts work standalone)  
 
 **You're ready to present September completion!**

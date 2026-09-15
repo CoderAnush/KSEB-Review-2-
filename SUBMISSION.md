@@ -19,7 +19,9 @@ Start here to understand the real-world baseline:
   - `output/reconciliation_stats.json` — validated cost total (₹2068610789.09)
   - `output/kseb_filedrop.csv` — ingestion-ready demand + price data
   - `output/kseb_8day_*.csv` — tidy schedules and hydro breakdown
-  - `output/chart_*.png` (7 visualizations) — exploratory analysis
+  - `output/chart_demand_profile.png`, `chart_demand_delta.png`, `chart_deviation_pattern.png`,
+    `chart_hydro_energy.png`, `chart_market_rates.png`, `chart_supply_mix.png` (6 charts from
+    this real field data; 16 charts total across the full repo, see Section 3)
 
 **Key Finding:** Real-world baseline is ₹2,068.6 Cr (₹258.6 M/day). The system must beat this.
 
@@ -47,35 +49,45 @@ Understand how forecasts are built:
   - Versioned save/load (v0001, v0002, ...)
   - Test: `test_registry_round_trip`
 
-- **Service orchestration:** `backend/app/forecasting/service.py`
-  - `run_forecasts(session, day, targets)` — the daily pipeline function
-  - Handles: history loading, feature building, model training/inference, DB persistence
-
 ---
 
 ### 3. **Demand Forecasting Results (September 2026)**
 This is what to showcase:
 
-- **Demand model performance:**
+All three forecasting targets are complete, each with its own trained model, per-fold backtest
+JSON, feature-importance chart, and holdout-forecast chart (16 charts total in `output/`):
+
+- **Demand:**
   - MAPE: **2.74%** (target ≤3.0%) ✅ **EXCEEDS TARGET**
   - MAE: 105.4 MW
-  - 8 folds over 400 days of synthetic data
-  - Pinball loss (p10/p90) computed
+  - `output/real_fold_details.json`, `real_feature_importance.json`, `real_holdout_forecast.json`
+  - `output/chart_real_validation_folds.png`, `chart_real_feature_importance.png`, `chart_real_holdout_forecast.png`
 
-- **Supporting models (bonus):**
-  - Price: MAE **374.5 ₹/MWh** (target ≤600) ✅
-  - Inflow: MAPE **17.53%** (target ≤25.0%) ✅
+- **Price:**
+  - MAE: **374.5 ₹/MWh** (target ≤600) ✅
+  - `output/real_fold_details_price.json`, `real_feature_importance_price.json`, `real_holdout_forecast_price.json`
+  - `output/chart_price_validation_folds.png`, `chart_price_feature_importance.png`, `chart_price_holdout_forecast.png`
+
+- **Inflow:**
+  - MAPE: **17.53%** (target ≤25.0%) ✅
+  - `output/real_fold_details_inflow.json`, `real_feature_importance_inflow.json`, `real_holdout_forecast_inflow.json`
+  - `output/chart_inflow_validation_folds.png`, `chart_inflow_feature_importance.png`, `chart_inflow_holdout_forecast.png`
+
+All three: 8-fold rolling-origin backtest, pinball loss (p10/p90) computed, 0 NaNs and 0
+P10≤P50≤P90 monotonicity violations across 2,881 holdout blocks each.
 
 - **Evidence:**
-  - `docs/metrics_forecasts.md` — auto-generated metrics table
+  - `docs/metrics_forecasts.md` — auto-generated metrics table (all 3 targets)
   - `backend/scripts/eval_forecasts.py` — reproducible evaluation script
-  - Run: `python -m scripts.eval_forecasts` to regenerate
+  - `backend/reports/extract_real_model_outputs.py` — produces the JSON above
+  - `backend/scripts/generate_all_charts.py` — regenerates all 16 charts end-to-end
+  - Run: `python -m scripts.eval_forecasts` or `python -m backend.scripts.generate_all_charts` to regenerate
 
 ---
 
 ## Test Execution
 
-All 8 tests pass:
+All 14 tests pass:
 
 ```bash
 cd backend
@@ -86,16 +98,22 @@ pytest tests/ -v
 
 **Expected output:**
 ```
+test_db_sanitize.py::test_sanitize_lowercases_and_collapses_special_chars PASSED ✅
+test_db_sanitize.py::test_sanitize_strips_leading_trailing_underscores .. PASSED ✅
+test_db_sanitize.py::test_sanitize_never_returns_empty_string ........... PASSED ✅
+test_db_sanitize.py::test_dedupe_disambiguates_collisions_deterministically PASSED ✅
+test_db_sanitize.py::test_dedupe_is_a_noop_when_no_collisions ........... PASSED ✅
 test_forecasting.py::test_feature_frame_columns_and_no_nan ............. PASSED ✅
 test_forecasting.py::test_kerala_holidays_include_onam_and_fixed ....... PASSED ✅
 test_forecasting.py::test_seasonal_naive_predicts_shapes .............. PASSED ✅
 test_forecasting.py::test_lightgbm_quantile_fit_predict ............... PASSED ✅
 test_forecasting.py::test_backtest_returns_finite_metrics ............. PASSED ✅
 test_forecasting.py::test_registry_round_trip ........................ PASSED ✅
+test_forecasting.py::test_calibrated_adapter_uses_configured_base ..... PASSED ✅
 test_forecasting.py::test_backtest_folds_exact_size_and_disjoint ...... PASSED ✅
 test_reconcile_8day.py::test_reconcile_reproduces_cost_and_filedrop ... PASSED ✅
 
-Total: 8 passed
+Total: 14 passed
 ```
 
 ---
@@ -125,26 +143,37 @@ backend/app/
 │   ├── timeblocks.py        # IST 96-block calendar (the time authority)
 │   └── configspecs.py       # Config dataclasses
 ├── adapters/
-│   └── synthetic.py         # Synthetic data generator (for testing)
-├── ingestion/
-│   └── service.py           # Data quality rules
+│   ├── base.py              # Adapter interface (AdapterHealth)
+│   └── synthetic.py         # Synthetic data generator, calibrated from real KSEB data
 ├── forecasting/
 │   ├── features.py          # Feature engineering (lags, temporal, weather)
 │   ├── models.py            # LightGBM + SeasonalNaive
 │   ├── backtest.py          # Rolling-origin backtesting
 │   ├── registry.py          # Model save/load
-│   ├── service.py           # Orchestration (run_forecasts)
 │   └── __init__.py
+├── db/                      # Optional Postgres layer for output/*.csv (needs [db] extra)
+│   ├── connection.py
+│   ├── load_csvs.py
+│   ├── export_csvs.py
+│   └── verify_roundtrip.py
 ├── config.py                # Configuration loader
 └── logging_setup.py         # Logging setup
 
+backend/reports/              # Report/chart generators (not imported by app/)
+├── extract_real_model_outputs.py       # Trains models, writes real_*.json (all 3 targets)
+├── plot_real_model_outputs.py          # real_*.json -> chart_{target}_*.png
+├── generate_demand_calibration_chart.py
+└── plot_kseb_reconciliation_charts.py
+
 backend/tests/
-├── test_forecasting.py      # 7 tests covering all forecasting components
-└── test_reconcile_8day.py   # 1 test for data reconciliation
+├── test_forecasting.py      # 8 tests covering all forecasting components
+├── test_reconcile_8day.py   # 1 test for data reconciliation
+└── test_db_sanitize.py      # 5 tests for app/db column-name sanitization
 
 backend/scripts/
-├── eval_forecasts.py        # Auto-generate metrics report
-└── reconcile_kseb_8day.py   # Reconcile field data to tidy CSVs
+├── eval_forecasts.py           # Auto-generate metrics report
+├── reconcile_kseb_8day.py      # Reconcile field data to tidy CSVs
+└── generate_all_charts.py      # Regenerate all 16 charts end-to-end
 
 output/
 └── FINDINGS_KSEB_8DAY.md    # Detailed reconciliation findings
@@ -176,15 +205,17 @@ No manual steps. No external dependencies beyond the requirements in `pyproject.
 
 ## What's Next (October onwards)
 
-This submission focuses only on **data preparation & forecasting** (Milestones 1–3).
+This submission covers **data preparation & forecasting for all three targets** (demand, price,
+inflow — Milestones 1–3, including forecasting work originally scoped as a later milestone but
+completed within this submission).
 
 The full project continues with:
-- October: Market price & inflow forecasting (forecast module enhancements)
-- November: MILP optimization
-- December–January: Validation, RL control
-- February: Digital Twin
-- March: Multi-agent LLM narration
-- April: System integration & deployment
+- October: MILP-based hydro scheduling & procurement optimization
+- November: Model enhancement with operational constraints
+- December: RL-based pumped storage control policy
+- January: Digital Twin simulation environment
+- February: System integration & testing
+- March: Documentation, thesis writing, final deployment
 
 Those modules are held separately and will be included in future submissions.
 
@@ -196,7 +227,7 @@ Those modules are held separately and will be included in future submissions.
 ✅ **Features engineered** (13 features, tested)  
 ✅ **Models trained** (LightGBM for 3 targets)  
 ✅ **Demand forecast validated** (2.74% MAPE, target ≤3%)  
-✅ **All tests passing** (8/8)  
+✅ **All tests passing** (14/14)  
 ✅ **Reproducible** (scripts, fixtures, no external APIs)  
 
 **Status:** Ready for review and deployment of forecasting module.
@@ -204,5 +235,4 @@ Those modules are held separately and will be included in future submissions.
 ---
 
 **Contact:** [Project maintainer]  
-**Date:** September 4, 2026  
 **Repository:** https://github.com/CoderAnush/KSEB-Review-2-
