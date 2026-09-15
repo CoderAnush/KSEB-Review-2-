@@ -29,7 +29,7 @@ forecasting model development, data reconciliation, feature engineering, and eva
 - Price forecasting: MAE 374.5 (target ≤600) ✅
 - Inflow forecasting: MAPE 17.53% (target ≤25.0%) ✅
 - Reproducible evaluation script
-- Full test suite (8/8 tests passing)
+- Full test suite (14/14 tests passing)
 
 ---
 
@@ -186,7 +186,7 @@ single `python -m scripts.X` command.
 - [x] Evaluation script reproducible (`scripts/eval_forecasts.py`)
 - [x] Tests: All 7 forecasting tests **PASSED** ✅
 
-**Overall: 8/8 tests passing, all targets met or exceeded**
+**Overall: 14/14 tests passing, all targets met or exceeded**
 
 ---
 
