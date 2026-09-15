@@ -78,12 +78,15 @@ python -m scripts.reconcile_kseb_8day --xlsx ../data/Data_final.xlsx --out-dir .
 
 ### Optional: Load CSVs into Postgres
 ```bash
-# From the repo root - starts a local Postgres via Docker
+# From the repo root - set a real password (docker-compose.yml has no
+# default committed, on purpose) and start Postgres via Docker
+cp .env.example .env   # then edit .env: set your own POSTGRES_PASSWORD
+set -a && source .env && set +a   # or export the values your own way
 docker compose up -d
 
 # From backend/ - install the [db] extra, then load every output/*.csv
 # into a Postgres table (source of truth going forward; output/*.csv stays
-# as the portable, git-committed export)
+# as the portable, git-committed export). Needs the same env vars as above.
 pip install -e ".[db]"
 python -m app.db.load_csvs
 
