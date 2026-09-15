@@ -1,5 +1,24 @@
 # KSEB Agentic DSS — Review 2 (July–September 2026)
 
+## In plain terms
+
+Kerala's electricity board (KSEB) has to decide, a day ahead, how much power to buy and from
+where. Getting this wrong is expensive: buy too little and you risk blackouts or emergency
+purchases at high prices; buy too much and you waste money. This project builds the forecasting
+layer of a larger decision-support system that predicts, for each 15-minute slot of the next day:
+
+- **How much electricity Kerala will need** (demand, in MW)
+- **What it will cost to buy on the open power market** (price, in ₹/MWh)
+- **How much water will flow into the hydroelectric reservoirs** (inflow, in MWh) — since Kerala
+  relies heavily on hydropower, and how much water is coming in affects how much it can generate
+
+Each prediction isn't a single number — it's a range (a low estimate, a middle estimate, and a
+high estimate), so planners know not just "what's most likely" but "how much could this be off
+by." The rest of this document is the technical detail behind those three predictions: the data
+they're trained on, how accurate they are, and how to reproduce every chart and number yourself.
+
+---
+
 This is a **focused submission** containing **only the completed work through September 2026**: 
 forecasting model development, data reconciliation, feature engineering, and evaluation.
 
