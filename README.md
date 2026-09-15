@@ -203,7 +203,7 @@ single `python -m scripts.X` command.
   - **MAPE: 17.53%** (target ≤25.0%) ✅
 - [x] Metrics documented in `docs/metrics_forecasts.md`
 - [x] Evaluation script reproducible (`scripts/eval_forecasts.py`)
-- [x] Tests: All 7 forecasting tests **PASSED** ✅
+- [x] Tests: All 8 forecasting tests **PASSED** ✅
 
 **Overall: 14/14 tests passing, all targets met or exceeded**
 
@@ -294,4 +294,4 @@ These are scheduled for October–April 2027 and are held separately in the full
 ---
 
 **Status:** ✅ **July–September 2026 milestones COMPLETE and VERIFIED**  
-**Last Updated:** September 4, 2026
+**Last Updated:** September 15, 2026
