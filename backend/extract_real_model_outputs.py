@@ -5,6 +5,10 @@ Every number here comes directly from:
 - A LightGBMQuantile model's underlying LGBMRegressor.feature_importances_
 - A trained model's own predict_day() output (real P10/P50/P90 forecasts)
 
+Covers all three forecasting targets: demand, price, inflow.
+Demand keeps its original (unsuffixed) filenames for backward compatibility;
+price and inflow write target-suffixed files alongside them.
+
 Run from backend/:  python extract_real_model_outputs.py
 """
 
@@ -24,13 +28,22 @@ from app.forecasting.models import make_model, quantile_label
 OUT_DIR = Path("../output")
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
+# demand keeps unsuffixed names (pre-existing); price/inflow get a target suffix
+FILE_SUFFIX = {
+    ForecastTarget.DEMAND: "",
+    ForecastTarget.PRICE: "_price",
+    ForecastTarget.INFLOW: "_inflow",
+}
+
+SERIES = {
+    ForecastTarget.DEMAND: ("demand", "demand_mw", 42),
+    ForecastTarget.PRICE: ("price", "price_dam_inr_mwh", 43),
+    ForecastTarget.INFLOW: ("inflow", "inflow_mwh", 44),
+}
+
 
 def synthetic_history(target: ForecastTarget, days: int, end: date):
-    name, series_id, seed = {
-        ForecastTarget.DEMAND: ("demand", "demand_mw", 42),
-        ForecastTarget.PRICE: ("price", "price_dam_inr_mwh", 43),
-        ForecastTarget.INFLOW: ("inflow", "inflow_mwh", 44),
-    }[target]
+    name, series_id, seed = SERIES[target]
     adapter = make_synthetic_adapter(name, series_id, seed)
     points = []
     d = end - timedelta(days=days)
@@ -40,11 +53,11 @@ def synthetic_history(target: ForecastTarget, days: int, end: date):
     return points_to_frame(points)
 
 
-def main() -> None:
-    cfg = load_config("forecasting")
-    end = date.fromisoformat("2026-07-01")
-    days = 400
-    target = ForecastTarget.DEMAND
+def extract_target(cfg: dict, target: ForecastTarget, end: date, days: int) -> None:
+    suffix = FILE_SUFFIX[target]
+    print("\n" + "#" * 70)
+    print(f"# TARGET: {target.value.upper()}")
+    print("#" * 70)
 
     print("=" * 70)
     print("STEP 1: Real per-fold backtest results (rolling_origin_backtest)")
@@ -58,7 +71,8 @@ def main() -> None:
           f"MAPE={metrics.mape_pct:.3f}%  MAE={metrics.mae:.3f}  "
           f"pinball_p10={metrics.pinball_p10:.3f}  pinball_p90={metrics.pinball_p90:.3f}")
 
-    with open(OUT_DIR / "real_fold_details.json", "w", encoding="utf-8") as fh:
+    fold_path = OUT_DIR / f"real_fold_details{suffix}.json"
+    with open(fold_path, "w", encoding="utf-8") as fh:
         json.dump(
             {
                 "target": target.value,
@@ -73,7 +87,7 @@ def main() -> None:
             fh,
             indent=2,
         )
-    print(f"\n  written: {OUT_DIR / 'real_fold_details.json'}")
+    print(f"\n  written: {fold_path}")
 
     print("\n" + "=" * 70)
     print("STEP 2: Real feature importances from a trained LightGBM model")
@@ -97,7 +111,8 @@ def main() -> None:
         pct = 100 * imp / total
         print(f"    {name:20s}  raw={imp:6d}  ({pct:5.1f}%)")
 
-    with open(OUT_DIR / "real_feature_importance.json", "w", encoding="utf-8") as fh:
+    feat_path = OUT_DIR / f"real_feature_importance{suffix}.json"
+    with open(feat_path, "w", encoding="utf-8") as fh:
         json.dump(
             {
                 "target": target.value,
@@ -108,7 +123,7 @@ def main() -> None:
             fh,
             indent=2,
         )
-    print(f"\n  written: {OUT_DIR / 'real_feature_importance.json'}")
+    print(f"\n  written: {feat_path}")
 
     print("\n" + "=" * 70)
     print("STEP 3: Real actual-vs-forecast (P10/P50/P90) on a held-out test window")
@@ -132,12 +147,27 @@ def main() -> None:
         {"ts": str(ts), "actual": a, "p10": lo, "p50": mid, "p90": hi}
         for ts, a, lo, mid, hi in zip(test_frame.index, actual, p10, p50, p90)
     ]
-    with open(OUT_DIR / "real_holdout_forecast.json", "w", encoding="utf-8") as fh:
+    holdout_path = OUT_DIR / f"real_holdout_forecast{suffix}.json"
+    with open(holdout_path, "w", encoding="utf-8") as fh:
         json.dump({"target": target.value, "cutoff": str(cutoff), "rows": rows}, fh, indent=2)
     print(f"  Held out {len(rows)} blocks from {cutoff.date()} onward")
-    print(f"  written: {OUT_DIR / 'real_holdout_forecast.json'}")
+    print(f"  written: {holdout_path}")
 
-    print("\nDONE. All three JSON files contain real, non-fabricated model output.")
+
+def main() -> None:
+    cfg = load_config("forecasting")
+    end = date.fromisoformat("2026-07-01")
+    days = 400
+
+    for target in (ForecastTarget.DEMAND, ForecastTarget.PRICE, ForecastTarget.INFLOW):
+        extract_target(cfg, target, end, days)
+
+    print("\n" + "=" * 70)
+    print("DONE. Real, non-fabricated model output written for all 3 targets:")
+    print("  demand -> real_fold_details.json, real_feature_importance.json, real_holdout_forecast.json")
+    print("  price  -> real_fold_details_price.json, real_feature_importance_price.json, real_holdout_forecast_price.json")
+    print("  inflow -> real_fold_details_inflow.json, real_feature_importance_inflow.json, real_holdout_forecast_inflow.json")
+    print("=" * 70)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,62 @@
+{
+  "target": "inflow",
+  "quantile": "p50",
+  "importance_type": "split",
+  "features": [
+    {
+      "name": "lag_14d",
+      "raw_importance": 4488,
+      "pct": 24.13422241342224
+    },
+    {
+      "name": "lag_7d",
+      "raw_importance": 4444,
+      "pct": 23.89761238976124
+    },
+    {
+      "name": "lag_1d",
+      "raw_importance": 4088,
+      "pct": 21.98322219832222
+    },
+    {
+      "name": "dow",
+      "raw_importance": 2884,
+      "pct": 15.508711550871155
+    },
+    {
+      "name": "month_sin",
+      "raw_importance": 1044,
+      "pct": 5.6141105614110565
+    },
+    {
+      "name": "block_sin",
+      "raw_importance": 538,
+      "pct": 2.893095289309529
+    },
+    {
+      "name": "month_cos",
+      "raw_importance": 512,
+      "pct": 2.7532802753280277
+    },
+    {
+      "name": "block_cos",
+      "raw_importance": 454,
+      "pct": 2.4413852441385244
+    },
+    {
+      "name": "is_holiday",
+      "raw_importance": 144,
+      "pct": 0.7743600774360078
+    },
+    {
+      "name": "is_weekend",
+      "raw_importance": 0,
+      "pct": 0.0
+    },
+    {
+      "name": "precipitation",
+      "raw_importance": 0,
+      "pct": 0.0
+    }
+  ]
+}

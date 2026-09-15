@@ -1,0 +1,57 @@
+{
+  "target": "price",
+  "quantile": "p50",
+  "importance_type": "split",
+  "features": [
+    {
+      "name": "lag_7d",
+      "raw_importance": 3597,
+      "pct": 19.338709677419356
+    },
+    {
+      "name": "lag_2d",
+      "raw_importance": 3337,
+      "pct": 17.940860215053764
+    },
+    {
+      "name": "lag_1d",
+      "raw_importance": 3318,
+      "pct": 17.838709677419356
+    },
+    {
+      "name": "dow",
+      "raw_importance": 2568,
+      "pct": 13.806451612903226
+    },
+    {
+      "name": "month_sin",
+      "raw_importance": 1588,
+      "pct": 8.53763440860215
+    },
+    {
+      "name": "block_sin",
+      "raw_importance": 1506,
+      "pct": 8.096774193548388
+    },
+    {
+      "name": "month_cos",
+      "raw_importance": 1431,
+      "pct": 7.693548387096774
+    },
+    {
+      "name": "block_cos",
+      "raw_importance": 1062,
+      "pct": 5.709677419354839
+    },
+    {
+      "name": "is_holiday",
+      "raw_importance": 193,
+      "pct": 1.0376344086021505
+    },
+    {
+      "name": "is_weekend",
+      "raw_importance": 0,
+      "pct": 0.0
+    }
+  ]
+}
