@@ -18,6 +18,9 @@ build/
 .DS_Store
 *.egg
 .coverage
+
+# scratch round-trip output from app/db/export_csvs.py, not a deliverable
+output/db_export/
 htmlcov/
 .idea/
 .vscode/

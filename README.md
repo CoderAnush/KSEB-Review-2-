@@ -49,10 +49,10 @@ pip install -e ".[dev]"
 
 ### Run Tests
 ```bash
-# All forecasting & reconciliation tests
-pytest tests/test_forecasting.py tests/test_reconcile_8day.py -v
+# All tests (forecasting, reconciliation, DB sanitization)
+pytest tests/ -v
 
-# Expected: 8 passed
+# Expected: 14 passed
 ```
 
 ### Regenerate Metrics
@@ -63,10 +63,34 @@ python -m scripts.eval_forecasts
 # Output: docs/metrics_forecasts.md (auto-generated)
 ```
 
+### Regenerate All 16 Charts
+```bash
+# From the repo root - extracts real model outputs (demand/price/inflow)
+# then regenerates every PNG in output/ from source data
+python -m backend.scripts.generate_all_charts
+```
+
 ### Reconcile KSEB 8-Day Data
 ```bash
 # Regenerate reconciliation artifacts from data/Data_final.xlsx
 python -m scripts.reconcile_kseb_8day --xlsx ../data/Data_final.xlsx --out-dir ../output
+```
+
+### Optional: Load CSVs into Postgres
+```bash
+# From the repo root - starts a local Postgres via Docker
+docker compose up -d
+
+# From backend/ - install the [db] extra, then load every output/*.csv
+# into a Postgres table (source of truth going forward; output/*.csv stays
+# as the portable, git-committed export)
+pip install -e ".[db]"
+python -m app.db.load_csvs
+
+# Prove the round-trip preserves the data (writes to output/db_export/,
+# never touches the committed CSVs in output/):
+python -m app.db.export_csvs
+python -m app.db.verify_roundtrip
 ```
 
 ---
@@ -74,20 +98,36 @@ python -m scripts.reconcile_kseb_8day --xlsx ../data/Data_final.xlsx --out-dir .
 ## Repository Structure
 
 ```
+docker-compose.yml     # Local Postgres for app/db/ (optional, see below)
+.env.example           # DATABASE_URL template
+
 backend/
-  app/
-    domain/           # Pydantic entities, IST 96-block calendar
-    adapters/         # Data source adapters (synthetic, Open-Meteo)
-    ingestion/        # Data quality rules, deduplication, gap-filling
-    forecasting/      # LightGBM, backtesting, model registry
-    config.py         # Configuration loader
-    logging_setup.py  # Logging setup
+  app/                    # The actual forecasting package - imported at runtime
+    domain/                 # Pydantic entities, IST 96-block calendar (timeblocks.py)
+    adapters/                # Data source adapters (synthetic.py, base.py)
+    forecasting/             # features.py, models.py (LightGBM), backtest.py, registry.py
+    db/                      # Optional Postgres layer for output/*.csv (needs [db] extra)
+      connection.py            # SQLAlchemy engine (reads DATABASE_URL)
+      load_csvs.py             # output/*.csv -> Postgres tables
+      export_csvs.py           # Postgres tables -> output/db_export/*.csv
+      verify_roundtrip.py      # Proves load+export preserves every value
+      repositories/            # reserved for a future live service layer (currently empty)
+    config.py                # Configuration loader (reads configs/*.yaml)
+    logging_setup.py         # structlog JSON logging setup
+  reports/                # Standalone report/chart generators - NOT imported by app/,
+                           # run manually or via scripts/generate_all_charts.py
+    extract_real_model_outputs.py     # Trains models, writes real_*.json (all 3 targets)
+    plot_real_model_outputs.py        # real_*.json -> chart_{target}_*.png (9 charts)
+    generate_demand_calibration_chart.py  # Synthetic-vs-real calibration chart
+    plot_kseb_reconciliation_charts.py    # KSEB 8-day field-data charts (6 charts)
+  scripts/                # CLI entrypoints, run with `python -m scripts.X`
+    eval_forecasts.py         # Regenerate docs/metrics_forecasts.md
+    reconcile_kseb_8day.py    # Rebuild kseb_filedrop.csv from data/Data_final.xlsx
+    generate_all_charts.py    # Master script: regenerates all 16 charts end-to-end
   tests/
-    test_forecasting.py          # 7 tests, all passing ✅
-    test_reconcile_8day.py       # 1 test, passing ✅
-  scripts/
-    eval_forecasts.py            # Regenerate metrics report
-    reconcile_kseb_8day.py       # Reconcile field data
+    test_forecasting.py       # Feature engineering, models, backtest, calibration (9 tests)
+    test_reconcile_8day.py    # KSEB reconciliation reproducibility (1 test)
+    test_db_sanitize.py       # app/db column-name sanitization, no DB needed (5 tests, "skipped" if [db] extra isn't installed)
 
 configs/
   forecasting.yaml      # Model config (LightGBM, quantiles, lags, weather features)
@@ -96,24 +136,20 @@ configs/
 data/
   Data_final.xlsx       # 8-day KSEB field data (May 5–12, 2025, 768 blocks)
 
-output/
-  FINDINGS_KSEB_8DAY.md          # Reconciliation findings & calibration proposal (14 KB)
-  reconciliation_stats.json      # Validated cost totals (₹2068610789.09)
-  kseb_filedrop.csv              # Tidy demand + price data (ingestion-ready)
-  kseb_8day_schedule_tidy.csv    # Per-source schedule breakdown
-  kseb_8day_hydro_tidy.csv       # Station-wise hydro data
-  chart_*.png (7 files)          # Exploratory visualizations
-    ├── demand_profile.png        # Normalized 96-block demand curve
-    ├── demand_delta.png          # Synthetic vs actual divergence
-    ├── supply_mix.png            # Per-source MW breakdown
-    ├── market_rates.png          # PX/RTM rate behavior
-    ├── hydro_energy.png          # Inflow/outflow/SoC
-    ├── deviation_pattern.png     # DSM deviation histogram
-    └── demand_profile_after.png  # Post-calibration profile
+output/                 # All generated deliverables (git-committed) - see
+  ...                   # `python -m backend.scripts.generate_all_charts` to regenerate
+  db_export/             # gitignored - scratch output from app/db/export_csvs.py only
 
 docs/
   metrics_forecasts.md   # Auto-generated backtest results (regenerate with eval_forecasts.py)
 ```
+
+**Why `app/` vs `reports/` vs `scripts/`:** `app/` is the forecasting library itself (feature
+engineering, models, backtesting) - nothing in it writes files or prints to stdout. `reports/`
+scripts import from `app/` and produce this repo's deliverables (charts, JSON metrics) - they're
+entrypoints, not library code. `scripts/` are thin CLI wrappers (`eval_forecasts.py`,
+`reconcile_kseb_8day.py`, `generate_all_charts.py`) that tie `app/` and `reports/` together for a
+single `python -m scripts.X` command.
 
 ---
 
@@ -154,18 +190,24 @@ docs/
 ## Test Results
 
 ```bash
-$ pytest tests/test_forecasting.py tests/test_reconcile_8day.py -v
+$ pytest tests/ -v
 
+tests/test_db_sanitize.py::test_sanitize_lowercases_and_collapses_special_chars PASSED ✅
+tests/test_db_sanitize.py::test_sanitize_strips_leading_trailing_underscores .. PASSED ✅
+tests/test_db_sanitize.py::test_sanitize_never_returns_empty_string ........... PASSED ✅
+tests/test_db_sanitize.py::test_dedupe_disambiguates_collisions_deterministically PASSED ✅
+tests/test_db_sanitize.py::test_dedupe_is_a_noop_when_no_collisions ........... PASSED ✅
 tests/test_forecasting.py::test_feature_frame_columns_and_no_nan ........ PASSED ✅
 tests/test_forecasting.py::test_kerala_holidays_include_onam_and_fixed .. PASSED ✅
 tests/test_forecasting.py::test_seasonal_naive_predicts_shapes ......... PASSED ✅
 tests/test_forecasting.py::test_lightgbm_quantile_fit_predict .......... PASSED ✅
 tests/test_forecasting.py::test_backtest_returns_finite_metrics ........ PASSED ✅
 tests/test_forecasting.py::test_registry_round_trip ................... PASSED ✅
+tests/test_forecasting.py::test_calibrated_adapter_uses_configured_base PASSED ✅
 tests/test_forecasting.py::test_backtest_folds_exact_size_and_disjoint .. PASSED ✅
 tests/test_reconcile_8day.py::test_reconcile_reproduces_cost_and_filedrop PASSED ✅
 
-Total: 8 passed in 4.96s ✅
+Total: 14 passed in ~5s ✅
 ```
 
 ---
@@ -208,11 +250,12 @@ These are scheduled for October–April 2027 and are held separately in the full
 ## Files to Review
 
 **Evidence of Completion:**
-1. **Tests:** `backend/tests/test_forecasting.py`, `backend/tests/test_reconcile_8day.py`
+1. **Tests:** `backend/tests/` (`test_forecasting.py`, `test_reconcile_8day.py`, `test_db_sanitize.py`)
 2. **Metrics:** `docs/metrics_forecasts.md` (auto-generated)
 3. **Findings:** `output/FINDINGS_KSEB_8DAY.md` (reconciliation analysis)
-4. **Scripts:** `backend/scripts/eval_forecasts.py`, `backend/scripts/reconcile_kseb_8day.py`
-5. **Code:** `backend/app/forecasting/`, `backend/app/ingestion/`, `backend/app/domain/`
+4. **Scripts:** `backend/scripts/eval_forecasts.py`, `backend/scripts/reconcile_kseb_8day.py`, `backend/scripts/generate_all_charts.py`
+5. **Report generators:** `backend/reports/` (produces all 16 charts + `real_*.json` metrics)
+6. **Code:** `backend/app/forecasting/`, `backend/app/adapters/`, `backend/app/domain/`, `backend/app/db/`
 
 ---
 

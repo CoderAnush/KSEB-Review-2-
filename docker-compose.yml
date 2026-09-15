@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: kseb_postgres
+    environment:
+      POSTGRES_USER: kseb
+      POSTGRES_PASSWORD: kseb
+      POSTGRES_DB: kseb
+    ports:
+      - "5433:5432"  # 5432 is often already taken by another local project's Postgres
+    volumes:
+      - kseb_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kseb -d kseb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  kseb_pg_data:

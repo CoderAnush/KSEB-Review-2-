@@ -27,6 +27,13 @@ dev = [
     "ruff>=0.1",
     "mypy>=1.0",
 ]
+db = [
+    "sqlalchemy>=2.0",
+    "psycopg2-binary>=2.9",
+]
+
+[tool.setuptools.packages.find]
+include = ["app*", "scripts*", "reports*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
