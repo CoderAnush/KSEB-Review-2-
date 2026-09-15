@@ -51,7 +51,7 @@ def rolling_origin_backtest(
             )
         log.warning("backtest_shrunk", target=target.value, folds=folds)
 
-    fold_details: list[dict[str, float]] = []
+    fold_details: list[dict[str, Any]] = []
     mapes, maes, pin_lo, pin_hi = [], [], [], []
     for i in range(folds):
         test_end = days[len(days) - (folds - 1 - i) * fold_days - 1]

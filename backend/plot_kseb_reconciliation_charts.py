@@ -11,13 +11,10 @@ Source: data/Data_final.xlsx, post-processed via scripts/reconcile_kseb_8day.py
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent))
-sys.stdout.reconfigure(encoding="utf-8")
-
-import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
-from matplotlib.dates import DateFormatter
+import pandas as pd
+
+sys.stdout.reconfigure(encoding="utf-8")
 
 OUT_DIR = Path(__file__).parent.parent / "output"
 

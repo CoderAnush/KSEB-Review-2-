@@ -9,16 +9,17 @@ live and reproducible.
 """
 
 import sys
+from datetime import date
 from pathlib import Path
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).parent))
 sys.stdout.reconfigure(encoding="utf-8")
 
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-from app.adapters.synthetic import make_synthetic_adapter
-from datetime import date, timedelta
+from app.adapters.synthetic import make_synthetic_adapter  # noqa: E402
 
 OUT_DIR = Path(__file__).parent.parent / "output"
 
