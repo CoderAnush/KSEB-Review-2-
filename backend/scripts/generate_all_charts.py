@@ -34,7 +34,7 @@ def main():
     # Re-extract real fold/feature-importance/holdout JSON for all 3 targets
     print("\n[Extract] Real model outputs for demand, price, inflow...")
     try:
-        from backend.extract_real_model_outputs import main as extract_main
+        from backend.reports.extract_real_model_outputs import main as extract_main
         extract_main()
         print("✅ Real model outputs extracted successfully")
     except Exception as e:
@@ -44,7 +44,7 @@ def main():
     # Charts 8-16: Forecasting model validation for all 3 targets (from plot_real_model_outputs.py)
     print("\n[Charts 8-16] Forecasting model validation charts (demand, price, inflow)...")
     try:
-        from backend.plot_real_model_outputs import main as plot_main
+        from backend.reports.plot_real_model_outputs import main as plot_main
         plot_main()
         print("✅ Charts 8-16 regenerated successfully")
     except Exception as e:
@@ -54,7 +54,7 @@ def main():
     # Chart: Calibration comparison (from generate_demand_calibration_chart.py)
     print("\n[Chart demand_profile_after] Calibration comparison chart...")
     try:
-        from backend.generate_demand_calibration_chart import main as gen_main
+        from backend.reports.generate_demand_calibration_chart import main as gen_main
         gen_main()
         print("✅ Chart demand_profile_after regenerated successfully")
     except Exception as e:
@@ -64,7 +64,7 @@ def main():
     # Charts 1-7: KSEB 8-day reconciliation charts (from kseb_8day_*.csv sources)
     print("\n[Charts 1-7] KSEB 8-day reconciliation charts...")
     try:
-        from backend.plot_kseb_reconciliation_charts import main as recon_main
+        from backend.reports.plot_kseb_reconciliation_charts import main as recon_main
         recon_main()
         print("✅ Charts 1-7 regenerated successfully")
     except Exception as e:

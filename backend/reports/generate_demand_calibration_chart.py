@@ -16,12 +16,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).parent.parent))  # backend/, for 'app.*' imports
 sys.stdout.reconfigure(encoding="utf-8")
 
 from app.adapters.synthetic import make_synthetic_adapter  # noqa: E402
 
-OUT_DIR = Path(__file__).parent.parent / "output"
+OUT_DIR = Path(__file__).parent.parent.parent / "output"
 
 
 def main():

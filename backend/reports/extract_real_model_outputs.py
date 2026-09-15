@@ -9,23 +9,27 @@ Covers all three forecasting targets: demand, price, inflow.
 Demand keeps its original (unsuffixed) filenames for backward compatibility;
 price and inflow write target-suffixed files alongside them.
 
-Run from backend/:  python extract_real_model_outputs.py
+Run from backend/reports/:  python extract_real_model_outputs.py
+Or as a module from backend/:  python -m reports.extract_real_model_outputs
 """
 
 from __future__ import annotations
 
 import json
+import sys
 from datetime import date, timedelta
 from pathlib import Path
 
-from app.adapters.synthetic import make_synthetic_adapter
-from app.config import load_config
-from app.domain.enums import ForecastTarget
-from app.forecasting.backtest import rolling_origin_backtest
-from app.forecasting.features import build_feature_frame, points_to_frame
-from app.forecasting.models import make_model, quantile_label
+sys.path.insert(0, str(Path(__file__).parent.parent))  # backend/, for 'app.*' imports
 
-OUT_DIR = Path(__file__).parent.parent / "output"
+from app.adapters.synthetic import make_synthetic_adapter  # noqa: E402
+from app.config import load_config  # noqa: E402
+from app.domain.enums import ForecastTarget  # noqa: E402
+from app.forecasting.backtest import rolling_origin_backtest  # noqa: E402
+from app.forecasting.features import build_feature_frame, points_to_frame  # noqa: E402
+from app.forecasting.models import make_model, quantile_label  # noqa: E402
+
+OUT_DIR = Path(__file__).parent.parent.parent / "output"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # demand keeps unsuffixed names (pre-existing); price/inflow get a target suffix

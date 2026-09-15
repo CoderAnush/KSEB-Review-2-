@@ -16,7 +16,7 @@ import pandas as pd
 
 sys.stdout.reconfigure(encoding="utf-8")
 
-OUT_DIR = Path(__file__).parent.parent / "output"
+OUT_DIR = Path(__file__).parent.parent.parent / "output"
 
 
 def main():
