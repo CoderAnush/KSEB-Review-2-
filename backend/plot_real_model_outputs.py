@@ -10,7 +10,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import pandas as pd
 
-OUT_DIR = Path("../output")
+OUT_DIR = Path(__file__).parent.parent / "output"
 
 # demand keeps its original (unsuffixed) filenames; price/inflow use a suffix
 TARGETS = {

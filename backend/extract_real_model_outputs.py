@@ -25,7 +25,7 @@ from app.forecasting.backtest import rolling_origin_backtest
 from app.forecasting.features import build_feature_frame, points_to_frame
 from app.forecasting.models import make_model, quantile_label
 
-OUT_DIR = Path("../output")
+OUT_DIR = Path(__file__).parent.parent / "output"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # demand keeps unsuffixed names (pre-existing); price/inflow get a target suffix
